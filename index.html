@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Website audit - Python.org</title>
+<style>
+:root{
+  --accent:#4f46e5; --ink:#111827; --muted:#6b7280; --line:#e5e7eb;
+  --bg:#ffffff; --soft:#f9fafb; --high:#b91c1c; --med:#b45309; --low:#4b5563;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:40px 32px 72px}
+.brandbar{display:flex;justify-content:space-between;align-items:center;
+  border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:36px}
+.brand{font-weight:700;letter-spacing:.02em;text-transform:uppercase;font-size:13px}
+.brand span{color:var(--accent)}
+.meta{color:var(--muted);font-size:13px;text-align:right}
+h1{font-size:34px;line-height:1.15;margin:0 0 6px;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:15px;margin:0 0 32px}
+.hero{display:flex;gap:40px;align-items:center;background:var(--soft);
+  border:1px solid var(--line);border-radius:14px;padding:28px 32px;margin-bottom:36px}
+.gauge{--score:0;width:132px;height:132px;border-radius:50%;flex:0 0 132px;
+  background:conic-gradient(var(--accent) calc(var(--score)*1%), #e5e7eb 0);
+  display:flex;align-items:center;justify-content:center;position:relative}
+.gauge::after{content:"";position:absolute;inset:11px;background:var(--soft);
+  border-radius:50%}
+.gauge .val{position:relative;z-index:1;text-align:center;line-height:1}
+.gauge .num{font-size:40px;font-weight:700;letter-spacing:-.03em}
+.gauge .of{display:block;font-size:11px;color:var(--muted);margin-top:4px;
+  letter-spacing:.08em;text-transform:uppercase}
+.hero-txt h2{margin:0 0 8px;font-size:20px}
+.hero-txt p{margin:0;color:var(--muted)}
+.grade{display:inline-block;margin-left:10px;padding:2px 10px;border-radius:999px;
+  background:var(--accent);color:#fff;font-size:13px;font-weight:600;vertical-align:2px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 40px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-size:22px;letter-spacing:-.02em}
+.stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  margin:0 0 14px;font-weight:600}
+.section{margin-bottom:40px;page-break-inside:avoid}
+.delta{display:flex;gap:26px;flex-wrap:wrap;align-items:baseline;
+  border:1px solid var(--line);border-left:4px solid var(--accent);
+  border-radius:0 10px 10px 0;padding:14px 18px;margin:-22px 0 36px;font-size:13.5px}
+.delta .big{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-right:6px}
+.delta .up{color:#15803d} .delta .down{color:var(--high)} .delta .flat{color:var(--muted)}
+.delta b{font-weight:600}
+ol.actions{margin:0;padding-left:22px}
+ol.actions li{margin-bottom:12px}
+ol.actions b{display:block}
+ol.actions .chip{margin-right:9px;vertical-align:1px}
+ol.actions span{color:var(--muted);font-size:14px}
+.bars{display:grid;gap:14px}
+.bar{display:grid;grid-template-columns:160px 1fr 46px;gap:14px;align-items:center;font-size:14px}
+.track{height:9px;background:#e5e7eb;border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:99px}
+.bar .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.find{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:12px;
+  page-break-inside:avoid}
+.find-head{display:flex;gap:10px;align-items:baseline;margin-bottom:6px}
+.chip{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:4px;border:1px solid currentColor;flex:0 0 auto}
+.chip.high{color:var(--high)} .chip.medium{color:var(--med)} .chip.low{color:var(--low)}
+.find h4{margin:0;font-size:15px;font-weight:600}
+.find p{margin:6px 0 0;color:#374151;font-size:14px}
+.find .fix{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);
+  font-size:14px;color:#1f2937}
+.find .fix b{color:var(--accent);font-weight:600;margin-right:6px;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.ok{color:#15803d;font-weight:600} .no{color:var(--high);font-weight:600}
+.url{word-break:break-all;max-width:420px;display:inline-block}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:12px;line-height:1.6}
+@media print{
+  @page{size:A4;margin:12mm}
+  .wrap{max-width:none;padding:0}
+  body{font-size:11.5px}
+  .hero,.find,.stat{break-inside:avoid}
+  .section{break-inside:avoid}
+}
+</style></head>
+<body><div class="wrap">
+  <div class="brandbar">
+    <div class="brand">Northlight Studio <span>/ site audit</span></div>
+    <div class="meta">21 Oct 2026, 08:55<br>https://www.python.org/</div>
+  </div>
+
+  <h1>Website audit: Python.org</h1>
+  <p class="sub">18 pages reviewed &middot; four categories &middot; prioritised fix list</p>
+
+  <div class="hero">
+    <div class="gauge" style="--score:85"><div class="val">
+      <span class="num">85</span><span class="of">out of 100</span></div></div>
+    <div class="hero-txt">
+      <h2>Overall grade: B</h2>
+      <p>Good foundation with a short list of real fixes. 9 findings, mostly quick wins.</p>
+    </div>
+  </div>
+
+  
+
+  <div class="stats">
+    <div class="stat"><b>0</b><span>broken links</span></div>
+    <div class="stat"><b>0</b><span>images without alt</span></div>
+    <div class="stat"><b>0</b><span>pages without a title</span></div>
+    <div class="stat"><b>0.1s</b><span>avg response</span></div>
+  </div>
+
+  <div class="section">
+    <h3>What to fix first</h3>
+    <ol class="actions"><li><b><span class="chip medium">medium</span>No reachable XML sitemap</b><span>Generate /sitemap.xml, list it in robots.txt, and submit it in Google Search Console.</span></li><li><b><span class="chip medium">medium</span>1 page between 500 KB and 1 MB</b><span>Aim under 100 KB of HTML; push styles and data into cached assets.</span></li><li><b><span class="chip medium">medium</span>1 page served without compression</b><span>Enable gzip or brotli in the web server / CDN config. Usually a one-line change.</span></li><li><b><span class="chip low">low</span>3 pages between 150 KB and 500 KB of HTML</b><span>Move repeated markup into components and trim inline scripts.</span></li><li><b><span class="chip low">low</span>18 pages have no canonical tag</b><span>Add &lt;link rel=&quot;canonical&quot; href=&quot;...&quot;&gt; with the preferred absolute URL on every page.</span></li><li><b><span class="chip low">low</span>&quot;Click here&quot; style link text on 6 pages</b><span>Rewrite link text to describe the destination: &quot;read the 2026 pricing guide&quot;.</span></li></ol>
+  </div>
+
+  <div class="section">
+    <h3>Score by category</h3>
+    <div class="bars"><div class="bar"><div>Technical health</div><div class="track"><div class="fill" style="width:100%"></div></div><div class="n">100</div></div><div class="bar"><div>SEO &amp; content</div><div class="track"><div class="fill" style="width:74%"></div></div><div class="n">74</div></div><div class="bar"><div>Performance</div><div class="track"><div class="fill" style="width:76%"></div></div><div class="n">76</div></div><div class="bar"><div>Accessibility</div><div class="track"><div class="fill" style="width:90%"></div></div><div class="n">90</div></div></div>
+  </div>
+
+  <div class="section"><h3>Findings: seo &amp; content</h3><div class="find"><div class="find-head"><span class="chip low">low</span><h4>18 pages have no canonical tag</h4></div><p>Without a canonical, tracking parameters and duplicate paths can compete with each other in the index. <em style="color:#6b7280">(https://www.python.org/, https://www.python.org/psf/, https://www.python.org/jobs/ and 15 more)</em></p><div class="fix"><b>Fix</b>Add &lt;link rel=&quot;canonical&quot; href=&quot;...&quot;&gt; with the preferred absolute URL on every page.</div></div><div class="find"><div class="find-head"><span class="chip low">low</span><h4>9 pages have multiple H1 tags</h4></div><p>Multiple H1s blur the page&#x27;s main topic for both readers and crawlers. <em style="color:#6b7280">(https://www.python.org/, https://www.python.org/psf/, https://www.python.org/community/irc/ and 6 more)</em></p><div class="fix"><b>Fix</b>Keep one H1 per page; demote the others to H2.</div></div><div class="find"><div class="find-head"><span class="chip medium">medium</span><h4>No reachable XML sitemap</h4></div><p>Sitemaps speed up indexing of new pages and expose canonical versions of old ones. <em style="color:#6b7280">(https://www.python.org/)</em></p><div class="fix"><b>Fix</b>Generate /sitemap.xml, list it in robots.txt, and submit it in Google Search Console.</div></div><div class="find"><div class="find-head"><span class="chip low">low</span><h4>1 description over 160 characters</h4></div><p>Long descriptions get cut mid-sentence in search results. <em style="color:#6b7280">(https://www.python.org/download/alternatives)</em></p><div class="fix"><b>Fix</b>Trim to 140-160 characters; keep the first 120 as the pitch.</div></div></div><div class="section"><h3>Findings: performance</h3><div class="find"><div class="find-head"><span class="chip low">low</span><h4>3 pages between 150 KB and 500 KB of HTML</h4></div><p>Large documents delay first paint because the browser must parse everything before it can render. <em style="color:#6b7280">(https://www.python.org/downloads/, https://www.python.org/downloads/source/, https://www.python.org/downloads/macos/)</em></p><div class="fix"><b>Fix</b>Move repeated markup into components and trim inline scripts.</div></div><div class="find"><div class="find-head"><span class="chip medium">medium</span><h4>1 page between 500 KB and 1 MB</h4></div><p>Fat HTML still costs parse time on phones. <em style="color:#6b7280">(https://www.python.org/downloads/windows/)</em></p><div class="fix"><b>Fix</b>Aim under 100 KB of HTML; push styles and data into cached assets.</div></div><div class="find"><div class="find-head"><span class="chip medium">medium</span><h4>1 page served without compression</h4></div><p>No Content-Encoding header — the HTML crosses the wire at full size. <em style="color:#6b7280">(https://www.python.org/downloads/source/)</em></p><div class="fix"><b>Fix</b>Enable gzip or brotli in the web server / CDN config. Usually a one-line change.</div></div></div><div class="section"><h3>Findings: accessibility</h3><div class="find"><div class="find-head"><span class="chip low">low</span><h4>&quot;Click here&quot; style link text on 6 pages</h4></div><p>Screen reader users navigate by link list; &quot;read more&quot; tells them nothing out of context. <em style="color:#6b7280">(https://www.python.org/, https://www.python.org/psf/, https://www.python.org/community/ and 3 more)</em></p><div class="fix"><b>Fix</b>Rewrite link text to describe the destination: &quot;read the 2026 pricing guide&quot;.</div></div><div class="find"><div class="find-head"><span class="chip low">low</span><h4>2 pages have images without width/height</h4></div><p>Images without intrinsic dimensions cause layout shift as they load — the page visibly jumps. <em style="color:#6b7280">(https://www.python.org/jobs/, https://www.python.org/downloads/)</em></p><div class="fix"><b>Fix</b>Add width and height attributes (or CSS aspect-ratio) to every image.</div></div></div>
+
+  <div class="section">
+    <h3>Page detail</h3>
+    <table><thead><tr><th>URL</th><th>Status</th><th>Load</th><th>HTML</th>
+    <th>Title</th><th>Meta</th><th>H1</th></tr></thead>
+    <tbody><tr><td><span class="url">https://www.python.org/</span></td><td class="num">200</td><td class="num">0.09s</td><td class="num">51.5 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/psf/</span></td><td class="num">200</td><td class="num">0.41s</td><td class="num">49.6 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/jobs/</span></td><td class="num">200</td><td class="num">0.06s</td><td class="num">59.3 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/community/</span></td><td class="num">200</td><td class="num">0.18s</td><td class="num">35.0 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/community/irc/</span></td><td class="num">200</td><td class="num">0.20s</td><td class="num">33.4 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/about/</span></td><td class="num">200</td><td class="num">0.07s</td><td class="num">40.2 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/about/apps/</span></td><td class="num">200</td><td class="num">0.19s</td><td class="num">38.4 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/about/quotes/</span></td><td class="num">200</td><td class="num">0.19s</td><td class="num">39.5 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/about/gettingstarted/</span></td><td class="num">200</td><td class="num">0.08s</td><td class="num">36.3 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/about/help/</span></td><td class="num">200</td><td class="num">0.07s</td><td class="num">37.2 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/downloads/</span></td><td class="num">200</td><td class="num">0.07s</td><td class="num">213.5 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/downloads/source/</span></td><td class="num">200</td><td class="num">0.14s</td><td class="num">347.0 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/downloads/windows/</span></td><td class="num">200</td><td class="num">0.05s</td><td class="num">577.5 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/downloads/macos/</span></td><td class="num">200</td><td class="num">0.07s</td><td class="num">233.7 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/downloads/android/</span></td><td class="num">200</td><td class="num">0.07s</td><td class="num">72.3 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/downloads/ios/</span></td><td class="num">200</td><td class="num">0.09s</td><td class="num">56.3 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/download/other/</span></td><td class="num">200</td><td class="num">0.18s</td><td class="num">41.6 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr><tr><td><span class="url">https://www.python.org/download/alternatives</span></td><td class="num">200</td><td class="num">0.35s</td><td class="num">35.0 KB</td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td><td class="num"><span class="ok">yes</span></td></tr></tbody></table>
+  </div>
+
+  <footer>
+    <b>Method.</b> 18 pages crawled from https://www.python.org/ on 21 Oct 2026, 08:55, plus
+    25 sampled internal links. Checks run against the server response:
+    no JavaScript rendering, no field data (CrUX), no backlink or ranking data.
+    Scores are weighted equally across technical health, SEO, performance and
+    accessibility. A single run is a snapshot, not a trend.<br><br>
+    Prepared by Northlight Studio &middot; generated with Site Audit Kit v1.2.5.
+  </footer>
+</div></body></html>
